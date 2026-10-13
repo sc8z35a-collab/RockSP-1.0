@@ -1353,11 +1353,11 @@ button:focus-visible {
   overflow: hidden;
 }
 .seg button {
-  padding: calc(var(--u) * 0.9) calc(var(--u) * 2.2);
-  font-size: calc(var(--u) * 2.4);
-  font-family: var(--font-en);
-  font-weight: 700;
-  color: var(--muted);
+  padding: calc(var(--u) * 0.9) calc(var(--u) * 2.4);
+  font-size: calc(var(--u) * 2.5);
+  font-family: var(--font-text);
+  font-weight: 800;
+  color: rgba(238, 244, 255, 0.82);
 }
 .seg button.on {
   background: var(--c1);

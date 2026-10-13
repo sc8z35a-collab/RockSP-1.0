@@ -43,6 +43,7 @@ export class Effects {
     this.light = 0;
     this.lightColor = new THREE.Color(1, 1, 1);
     this.ambientTimer = 0;
+    this.flashScale = 1; // lowered for prefers-reduced-motion
   }
 
   setBudget(scale) {
@@ -68,7 +69,7 @@ export class Effects {
   }
 
   screenFlash(amount, color = WHITE) {
-    this.flash = Math.max(this.flash, amount);
+    this.flash = Math.max(this.flash, amount * this.flashScale);
     this.flashColor.copy(color);
   }
 
@@ -144,7 +145,7 @@ export class Effects {
       drag: 1.4,
     });
     this.world.floor.shockwave(point.x, point.z, { color: mix, maxR: 7, dur: 0.9, power: 1.4 });
-    this.impactLight(point, 12);
+    this.impactLight(point, 8);
     this.screenFlash(0.28);
     this.aberration = Math.max(this.aberration, 1.0);
     this.zoomAt(point, 0.35);
@@ -314,10 +315,10 @@ export class Effects {
       life: [2.5, 3.5],
     });
     this.sparks.burst(_v, {
-      count: 180,
-      radius: 0.2,
+      count: 130,
+      radius: 0.25,
       colors: [win, WHITE, GOLD, this.teamColor(loserSide)],
-      intensity: 3,
+      intensity: 2.3,
       speed: [3, 14],
       life: [0.5, 1.6],
       size: [0.014, 0.04],
@@ -339,10 +340,10 @@ export class Effects {
     this.sprites.flare(_v, { color: win, size: 3.0, dur: 0.6, intensity: 1.3 });
     this.world.floor.shockwave(_v.x, _v.z, { color: win, maxR: 12, dur: 1.4, power: 2.6 });
     this.world.floor.shockwave(_v.x, _v.z, { color: WHITE, maxR: 6, dur: 0.8, power: 1.5 });
-    this.impactLight(_v, 24, win);
-    this.screenFlash(0.5, WHITE);
+    this.impactLight(_v, 14, win);
+    this.screenFlash(0.42, WHITE);
     this.aberration = 2.2;
-    this.zoomAt(_v, 0.8);
+    this.zoomAt(_v, 0.6);
     this.rig.shake(1.0);
     this.rig.kick(9);
   }

@@ -31,6 +31,7 @@ export class CameraRig {
     this.orbit = 0; // 0..1 blend into the orbiting title camera
     this.orbitAngle = 0;
     this.drift = 1;
+    this.motionScale = 1; // lowered for prefers-reduced-motion
     this._tween = null;
     this._time = 0;
     this._from = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 0, roll: 0 };
@@ -62,7 +63,7 @@ export class CameraRig {
   }
 
   shake(amount) {
-    this.trauma = clamp(this.trauma + amount, 0, 1);
+    this.trauma = clamp(this.trauma + amount * this.motionScale, 0, 1);
   }
 
   kick(fovDelta) {

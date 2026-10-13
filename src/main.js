@@ -121,6 +121,10 @@ async function boot() {
   ui.setLoading(0.45, 'ASSEMBLING ROBOTS');
   await nextFrame();
   const fx = new Effects(world, rig, core);
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    rig.motionScale = 0.35;
+    fx.flashScale = 0.4;
+  }
   core.setup(world.scene, world.camera);
   core.onResize((w, h, preset) => {
     world.applyQuality(w, h, preset);
