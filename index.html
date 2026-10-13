@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060d" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NEON JANKEN" />
+    <meta name="description" content="3Dロボットハンドで戦う、ネオンアリーナのじゃんけんバトル。スマホ横画面・全画面対応。" />
+    <title>NEON CLASH じゃんけん</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800&family=Orbitron:wght@500;700;900&display=swap" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="gl" aria-label="3D battle stage"></canvas>
+
+      <!-- In-match HUD -->
+      <div id="hud" class="layer hidden">
+        <div class="hud-top">
+          <div class="fighter p1">
+            <div class="plate"><span class="tag">P1</span><span class="name" id="p1-name">YOU</span></div>
+            <div class="hp"><div class="hp-ghost" id="p1-ghost"></div><div class="hp-fill" id="p1-fill"></div><div class="hp-shine"></div></div>
+            <div class="sub"><span class="hp-num" id="p1-hp">100</span><span class="combo" id="p1-combo"></span></div>
+          </div>
+          <div class="center-box">
+            <button class="icon-btn" id="btn-pause" aria-label="ポーズ">
+              <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+            </button>
+            <div class="round" id="round-label">ROUND 1</div>
+          </div>
+          <div class="fighter p2">
+            <div class="plate"><span class="name" id="p2-name">CPU</span><span class="tag">CPU</span></div>
+            <div class="hp"><div class="hp-ghost" id="p2-ghost"></div><div class="hp-fill" id="p2-fill"></div><div class="hp-shine"></div></div>
+            <div class="sub"><span class="combo" id="p2-combo"></span><span class="hp-num" id="p2-hp">100</span></div>
+          </div>
+        </div>
+        <div class="prompt" id="prompt"></div>
+      </div>
+
+      <div id="choices" class="layer hidden" role="group" aria-label="手を選ぶ">
+        <button class="choice" data-hand="rock" aria-label="グー">
+          <span class="choice-ring"></span>
+          <span class="choice-icon" data-icon="rock"></span>
+          <span class="choice-label"><b>グー</b><i>ROCK</i></span>
+          <span class="key-hint">1</span>
+        </button>
+        <button class="choice" data-hand="scissors" aria-label="チョキ">
+          <span class="choice-ring"></span>
+          <span class="choice-icon" data-icon="scissors"></span>
+          <span class="choice-label"><b>チョキ</b><i>SCISSORS</i></span>
+          <span class="key-hint">2</span>
+        </button>
+        <button class="choice" data-hand="paper" aria-label="パー">
+          <span class="choice-ring"></span>
+          <span class="choice-icon" data-icon="paper"></span>
+          <span class="choice-label"><b>パー</b><i>PAPER</i></span>
+          <span class="key-hint">3</span>
+        </button>
+      </div>
+
+      <div id="callouts" class="layer"></div>
+      <div id="floaters" class="layer"></div>
+
+      <!-- Title -->
+      <div id="title" class="layer screen hidden">
+        <div class="title-logo">
+          <div class="logo-kicker">NEON JANKEN BATTLE</div>
+          <h1 class="logo-main">
+            <span class="w w1">ROCK</span>
+            <span class="w w2">SCISSORS</span>
+            <span class="w w3">PAPER</span>
+          </h1>
+          <div class="logo-sub"><span>じゃんけん</span><em>NEON CLASH</em></div>
+        </div>
+
+        <div class="tap-start" id="tap-start">
+          <div class="tap-text">TAP TO START</div>
+          <div class="tap-sub">画面をタップしてスタート</div>
+        </div>
+
+        <div class="menu hidden" id="menu">
+          <div class="menu-head">SELECT OPPONENT <span>対戦相手をえらぶ</span></div>
+          <div class="cards" id="diff-cards"></div>
+          <button class="btn-primary" id="btn-start"><span>BATTLE START</span><small>バトル開始</small></button>
+          <div class="menu-row">
+            <button class="btn-ghost" id="btn-howto">あそびかた</button>
+            <button class="btn-ghost" id="btn-settings">せってい</button>
+            <button class="btn-ghost" id="btn-fullscreen">全画面</button>
+          </div>
+          <div class="records" id="records"></div>
+        </div>
+        <div class="ios-hint hidden" id="ios-hint">iPhoneは「共有 → ホーム画面に追加」で全画面になります</div>
+      </div>
+
+      <!-- Result -->
+      <div id="result" class="layer screen hidden">
+        <div class="result-panel">
+          <div class="result-title" id="result-title">VICTORY</div>
+          <div class="result-sub" id="result-sub"></div>
+          <div class="result-body">
+            <div class="rank-box"><div class="rank-label">RANK</div><div class="rank" id="result-rank">S</div></div>
+            <div class="stats" id="result-stats"></div>
+          </div>
+          <div class="hand-usage" id="result-usage"></div>
+          <div class="badges" id="result-badges"></div>
+          <div class="result-actions">
+            <button class="btn-primary" id="btn-rematch"><span>REMATCH</span><small>もう一度</small></button>
+            <button class="btn-ghost" id="btn-title">タイトルへ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause / settings -->
+      <div id="pause" class="layer screen hidden">
+        <div class="panel">
+          <div class="panel-title" id="pause-title">PAUSE</div>
+          <div class="settings">
+            <label class="toggle"><span>BGM</span><input type="checkbox" id="set-bgm" /><i></i></label>
+            <label class="toggle"><span>効果音</span><input type="checkbox" id="set-sfx" /><i></i></label>
+            <label class="toggle"><span>振動</span><input type="checkbox" id="set-vibe" /><i></i></label>
+            <div class="seg-row">
+              <span>画質</span>
+              <div class="seg" id="set-quality">
+                <button data-q="auto">AUTO</button><button data-q="high">高</button><button data-q="medium">中</button><button data-q="low">低</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-primary" id="btn-resume"><span>RESUME</span><small>つづける</small></button>
+            <button class="btn-ghost" id="btn-quit">タイトルへ戻る</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- How to play -->
+      <div id="howto" class="layer screen hidden">
+        <div class="panel wide">
+          <div class="panel-title">HOW TO PLAY <span>あそびかた</span></div>
+          <div class="howto-grid">
+            <div class="rule"><span class="choice-icon small" data-icon="rock"></span><b>グー</b><p>チョキを<em>CRUSH</em>で粉砕！</p></div>
+            <div class="rule"><span class="choice-icon small" data-icon="scissors"></span><b>チョキ</b><p>パーを<em>SLASH</em>で切り裂く！</p></div>
+            <div class="rule"><span class="choice-icon small" data-icon="paper"></span><b>パー</b><p>グーを<em>WRAP</em>で包み込む！</p></div>
+          </div>
+          <ul class="howto-list">
+            <li>手をえらぶと「じゃん・けん・ぽん！」で勝負。あいこなら「あいこでしょ！」</li>
+            <li>勝つと相手にダメージ。<b>連続で勝つとコンボ</b>でダメージアップ！たまに<b>CRITICAL</b>も出る</li>
+            <li>相手のHPを0にしたらK.O.勝利。HARDのAIはあなたのクセを学習するぞ</li>
+            <li>キーボードなら <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> または <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> でも選べます</li>
+          </ul>
+          <div class="panel-actions"><button class="btn-primary" id="btn-howto-close"><span>OK</span><small>とじる</small></button></div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="layer">
+        <div class="load-mark"><span></span><span></span><span></span></div>
+        <div class="load-title">NEON CLASH</div>
+        <div class="load-bar"><div id="load-fill"></div></div>
+        <div class="load-text" id="load-text">LOADING</div>
+      </div>
+
+      <!-- Portrait warning -->
+      <div id="rotate" class="layer">
+        <div class="rotate-phone"><div class="rotate-screen"></div></div>
+        <div class="rotate-text">スマホを<b>横向き</b>にしてね</div>
+        <div class="rotate-sub">ROTATE YOUR DEVICE</div>
+      </div>
+
+      <div id="toast" class="layer"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
